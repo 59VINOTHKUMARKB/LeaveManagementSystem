@@ -83,11 +83,13 @@ function Navbar() {
               <>
                 <NavLink
                   to={
-                    currentUser.userType === "Staff"
+                    currentUser.isHod
+                      ? "/hoddash"
+                      : currentUser.userType === "Staff"
                       ? "/staffdashboard"
                       : currentUser.userType === "Student"
-                      ? "/profile"
-                      : "/hoddash"
+                      ? "/studentdashboard"
+                      : "/profile"
                   }
                 >
                   <span className="flex items-center gap-2">

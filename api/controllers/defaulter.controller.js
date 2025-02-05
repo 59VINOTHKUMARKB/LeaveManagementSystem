@@ -370,7 +370,6 @@ export const getPendingWorksByStudentId = async (req, res) => {
 };
 
 export const getDefaultersByMentorId = async (req, res) => {
-  console.log("MENTOR ID", req.params);
   const { mentorId } = req.params;
   const defaulters = await Defaulter.find({mentorId:mentorId})
   .populate("mentorId", "staff_name")
@@ -378,7 +377,6 @@ export const getDefaultersByMentorId = async (req, res) => {
   .sort({ entryDate: -1 })
   .limit(50);  
   
-  console.log("DEFUALTERS", defaulters);
   return res.status(200).json({ defaulters });
 };
 

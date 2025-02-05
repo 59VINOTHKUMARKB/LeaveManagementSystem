@@ -17,6 +17,7 @@ import SignIn from "./components/auth/SignIn";
 import Footer from "./components/general/Footer";
 import MailTiming from "./components/systems/MailTiming";
 import About from "./pages/About";
+import DepartmentReports from "./pages/DepartmentReports";
 
 const AppWrapper = () => {
   const location = useLocation();
@@ -62,6 +63,7 @@ const AppWrapper = () => {
 
         <Route element={<HodPrivateRoute />}>
           <Route path="/hoddash" element={<Hoddashboard />} />
+          <Route path="/department-reports" element={<DepartmentReports />} />
         </Route>
 
         <Route element={<StaffPrivateRoute />}>

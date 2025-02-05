@@ -30,6 +30,7 @@ export default function LeaveRequests({
   const [selectedRequest, setSelectedRequest] = useState(null);
   const isStaffBothMentorAndCI =
     currentUser.isMentor && currentUser.isClassIncharge;
+  const [activeTab, setActiveTab] = useState("pending");
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -367,17 +368,18 @@ export default function LeaveRequests({
     );
   };
 
+  // Add this function to filter requests based on status
+  const filterRequestsByStatus = (requests, role) => {
+    return requests.filter((request) =>
+      activeTab === "pending"
+        ? request.approvals[role].status === "pending"
+        : request.approvals[role].status !== "pending"
+    );
+  };
+
   // Update the renderRequestTable function to include mobile view
   const renderRequestTable = (requests, role, handleRequest) => {
-    // Add this to check what data we're receiving
-    console.log(
-      "Request data:",
-      requests.map((req) => ({
-        id: req._id,
-        mentorcomment: req.mentorcomment,
-        classInchargeComment: req.classInchargeComment,
-      }))
-    );
+
 
     return (
       <>
@@ -464,7 +466,6 @@ export default function LeaveRequests({
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      {console.log(req.mentorcomment)}{" "}
                       <CommentsCell
                         mentorcomment={req.mentorcomment}
                         classInchargeComment={req.classInchargeComment}
@@ -509,45 +510,84 @@ export default function LeaveRequests({
           </p>
         </div>
       </div>
+
+      {/* Tabs */}
+      <div className="flex space-x-4 mb-6">
+        <button
+          onClick={() => setActiveTab("pending")}
+          className={`flex-1 py-2 px-4 rounded-lg transition-colors ${
+            activeTab === "pending"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-gray-700"
+          }`}
+        >
+          Pending Requests
+        </button>
+        <button
+          onClick={() => setActiveTab("actionDone")}
+          className={`flex-1 py-2 px-4 rounded-lg transition-colors ${
+            activeTab === "actionDone"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-gray-700"
+          }`}
+        >
+          Action Done Requests
+        </button>
+      </div>
+
       {/* Mentor Requests Section */}
-      {currentUser.isMentor ? (
-        menteeRequests?.length > 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden mb-6">
-            <div className="p-4 border-b dark:border-gray-700">
-              <h2 className="text-lg font-semibold">
-                Leave Requests From Your Class Mentees
-              </h2>
-            </div>
-            {renderRequestTable(menteeRequests, "mentor", handleRequest)}
+      {currentUser.isMentor && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden mb-6">
+          <div className="p-4 border-b dark:border-gray-700">
+            <h2 className="text-lg font-semibold">
+              {activeTab === "pending" ? "Pending" : "Action Done"} Leave
+              Requests From Your Class Mentees
+            </h2>
           </div>
-        ) : (
-          <h2 className="font-semibold text-center p-6">
-            No Leave Requests from Your Mentees Yet!
-          </h2>
-        )
-      ) : null}
+          {filterRequestsByStatus(menteeRequests, "mentor").length > 0 ? (
+            renderRequestTable(
+              filterRequestsByStatus(menteeRequests, "mentor"),
+              "mentor",
+              handleRequest
+            )
+          ) : (
+            <h2 className="font-semibold text-center p-6">
+              No {activeTab === "pending" ? "Pending" : "Action Done"} Leave
+              Requests from Your Mentees
+            </h2>
+          )}
+        </div>
+      )}
 
       {/* Class Incharge Requests Section */}
-      {currentUser.isClassIncharge ? (
-        filteredClassInchargeRequests?.length > 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-            <div className="p-4 border-b dark:border-gray-700">
-              <h2 className="text-lg font-semibold">
-                Leave Requests From Your Class Students
-              </h2>
-            </div>
-            {renderRequestTable(
-              filteredClassInchargeRequests,
+      {currentUser.isClassIncharge && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+          <div className="p-4 border-b dark:border-gray-700">
+            <h2 className="text-lg font-semibold">
+              {activeTab === "pending" ? "Pending" : "Action Done"} Leave
+              Requests From Your Class Students
+            </h2>
+          </div>
+          {filterRequestsByStatus(
+            filteredClassInchargeRequests,
+            "classIncharge"
+          ).length > 0 ? (
+            renderRequestTable(
+              filterRequestsByStatus(
+                filteredClassInchargeRequests,
+                "classIncharge"
+              ),
               "classIncharge",
               handleRequestClassIncharge
-            )}
-          </div>
-        ) : (
-          <h2 className="font-semibold text-center p-6">
-            No Leave Requests from Your Students Yet!
-          </h2>
-        )
-      ) : null}
+            )
+          ) : (
+            <h2 className="font-semibold text-center p-6">
+              No {activeTab === "pending" ? "Pending" : "Action Done"} Leave
+              Requests from Your Students
+            </h2>
+          )}
+        </div>
+      )}
 
       {/* Mentor Modal */}
       <Modal

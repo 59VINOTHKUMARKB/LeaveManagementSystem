@@ -70,7 +70,6 @@ export const createLeaveRequest = async (req, res) => {
       isHalfDay,
       isStaff: false,
     });
-    console.log(studentLeaveRequest);
     await studentLeaveRequest.save();
     res.status(201).json({
       success: true,
@@ -328,11 +327,9 @@ export const getleaverequestsbySectionId = async (req, res, next) => {
 
   try {
     const { id } = req.params;
-    console.log(id);
     const data = await LeaveRequest.find({ sectionId: id }).sort({
       createdAt: -1,
     });
-    console.log(data);
     res.status(200).json(data);
   } catch (error) {
     console.error("Error fetching leave requests:", error);

@@ -26,6 +26,7 @@ export default function ODRequests({
   const [classInchargeComment, setclassInchargeComment] = useState("");
   const [showDetails, setShowDetails] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [activeTab, setActiveTab] = useState("pending");
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -149,6 +150,14 @@ export default function ODRequests({
       setLoading(false);
       handleCloseClassIncharge();
     }
+  };
+
+  const filterRequestsByStatus = (requests, role) => {
+    return requests.filter((request) =>
+      activeTab === "pending"
+        ? request.approvals[role].status === "pending"
+        : request.approvals[role].status !== "pending"
+    );
   };
 
   const filteredMenteeRequests = menteeRequests.filter(
@@ -505,40 +514,82 @@ export default function ODRequests({
           </p>
         </div>
       </div>
-      {/* Mentor Requests Section */}
 
-      {currentUser.isMentor?( menteeRequests?.length > 0 ? (
+      {/* Tabs */}
+      <div className="flex space-x-4 mb-6">
+        <button
+          onClick={() => setActiveTab("pending")}
+          className={`flex-1 py-2 px-4 rounded-lg transition-colors ${
+            activeTab === "pending"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-gray-700"
+          }`}
+        >
+          Pending Requests
+        </button>
+        <button
+          onClick={() => setActiveTab("actionDone")}
+          className={`flex-1 py-2 px-4 rounded-lg transition-colors ${
+            activeTab === "actionDone"
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-gray-700"
+          }`}
+        >
+          Action Done Requests
+        </button>
+      </div>
+
+      {/* Mentor Requests Section */}
+      {currentUser.isMentor && (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden mb-6">
           <div className="p-4 border-b dark:border-gray-700">
             <h2 className="text-lg font-semibold">
-              OD Requests From Your Mentees
+              {activeTab === "pending" ? "Pending" : "Action Done"} OD Requests
+              From Your Class Mentees
             </h2>
           </div>
-          {renderRequestTable(menteeRequests, "mentor", handleRequest)}
+          {filterRequestsByStatus(odRequestsAsMentor, "mentor").length > 0 ? (
+            renderRequestTable(
+              filterRequestsByStatus(odRequestsAsMentor, "mentor"),
+              "mentor",
+              handleRequest
+            )
+          ) : (
+            <h2 className="font-semibold text-center p-6">
+              No {activeTab === "pending" ? "Pending" : "Action Done"} OD
+              Requests from Your Mentees
+            </h2>
+          )}
         </div>
-      ) : (
-        <h2 className="font-semibold text-center p-6">No Od Requests from Your Mentees Yet!</h2>
-      )):null}
+      )}
 
       {/* Class Incharge Requests Section */}
-      {currentUser.isClassIncharge ? (
-        classInchargeRequests?.length > 0 ? (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-            <div className="p-4 border-b dark:border-gray-700">
-              <h2 className="text-lg font-semibold">
-                OD Requests From Your Class Students
-              </h2>
-            </div>
-            {renderRequestTable(
-              classInchargeRequests,
+      {currentUser.isClassIncharge && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+          <div className="p-4 border-b dark:border-gray-700">
+            <h2 className="text-lg font-semibold">
+              {activeTab === "pending" ? "Pending" : "Action Done"} OD Requests
+              From Your Class Students
+            </h2>
+          </div>
+          {filterRequestsByStatus(odRequestsAsClassIncharge, "classIncharge")
+            .length > 0 ? (
+            renderRequestTable(
+              filterRequestsByStatus(
+                odRequestsAsClassIncharge,
+                "classIncharge"
+              ),
               "classIncharge",
               handleRequestClassIncharge
-            )}
-          </div>
-        ) : (
-          <h2 className="font-semibold text-center p-6">No Od Requests from Your Students Yet!</h2>
-        )
-      ) : null}
+            )
+          ) : (
+            <h2 className="font-semibold text-center p-6">
+              No {activeTab === "pending" ? "Pending" : "Action Done"} OD
+              Requests from Your Students
+            </h2>
+          )}
+        </div>
+      )}
 
       {/* Mentor Modal */}
       <Modal
