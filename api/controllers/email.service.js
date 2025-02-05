@@ -848,5 +848,5 @@ export const scheduleEmails = () => {
   });
 };
 
-// Start the scheduler
+
 scheduleEmails();
